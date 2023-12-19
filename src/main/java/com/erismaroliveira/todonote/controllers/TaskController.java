@@ -18,6 +18,7 @@ import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import com.erismaroliveira.todonote.models.Task;
 import com.erismaroliveira.todonote.services.TaskService;
+import com.erismaroliveira.todonote.services.UserService;
 
 import jakarta.validation.Valid;
 
@@ -29,6 +30,9 @@ public class TaskController {
   @Autowired
   private TaskService taskService;
 
+  @Autowired
+  private UserService userService;
+
   @GetMapping("/{id}")
   public ResponseEntity<Task> findById(@PathVariable Long id) {
     Task task = this.taskService.findById(id);
@@ -37,6 +41,7 @@ public class TaskController {
 
   @GetMapping("/user/{userId}")
   public ResponseEntity<List<Task>> findAllByUserId(@PathVariable Long userId) {
+    this.userService.findById(userId);
     List<Task> tasks = this.taskService.findAllByUserId(userId);
     return ResponseEntity.ok().body(tasks);
   }
