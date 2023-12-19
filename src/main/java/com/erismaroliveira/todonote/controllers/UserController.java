@@ -23,7 +23,7 @@ import com.erismaroliveira.todonote.services.UserService;
 import jakarta.validation.Valid;
 
 @RestController
-@RequestMapping("/user")
+@RequestMapping("/api/v1/users")
 @Validated
 public class UserController {
 
