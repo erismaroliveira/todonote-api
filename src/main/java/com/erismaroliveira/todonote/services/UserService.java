@@ -8,6 +8,8 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.erismaroliveira.todonote.models.User;
 import com.erismaroliveira.todonote.repositories.UserRepository;
+import com.erismaroliveira.todonote.services.exceptions.DataBindingViolationException;
+import com.erismaroliveira.todonote.services.exceptions.ObjectNotFoundException;
 
 @Service
 public class UserService {
@@ -17,7 +19,8 @@ public class UserService {
 
   public User findById(Long id) {
     Optional<User> user = this.userRepository.findById(id);
-    return user.orElseThrow(() -> new RuntimeException("User not found! " + "ID: " + id + ", Type: " + User.class.getName()));
+    return user.orElseThrow(() -> new ObjectNotFoundException(
+      "User not found! " + "ID: " + id + ", Type: " + User.class.getName()));
   }
 
   @Transactional
@@ -39,7 +42,7 @@ public class UserService {
     try {
       this.userRepository.deleteById(id);
     } catch (Exception e) {
-      throw new RuntimeException("User has tasks, it can't be deleted");
+      throw new DataBindingViolationException("User has tasks, it can't be deleted");
     }
   }
 }

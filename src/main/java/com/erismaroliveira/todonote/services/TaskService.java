@@ -10,6 +10,8 @@ import org.springframework.transaction.annotation.Transactional;
 import com.erismaroliveira.todonote.models.Task;
 import com.erismaroliveira.todonote.models.User;
 import com.erismaroliveira.todonote.repositories.TaskRepository;
+import com.erismaroliveira.todonote.services.exceptions.DataBindingViolationException;
+import com.erismaroliveira.todonote.services.exceptions.ObjectNotFoundException;
 
 @Service
 public class TaskService {
@@ -22,7 +24,7 @@ public class TaskService {
 
   public Task findById(Long id) {
     Optional<Task> task = this.taskRepository.findById(id);
-    return task.orElseThrow(() -> new RuntimeException("Task not found" + "ID: " + id + ", Type: " + Task.class.getName()));
+    return task.orElseThrow(() -> new ObjectNotFoundException("Task not found" + "ID: " + id + ", Type: " + Task.class.getName()));
   }
 
   public List<Task> findAllByUserId(Long userId) {
@@ -50,7 +52,7 @@ public class TaskService {
     try {
       this.taskRepository.deleteById(id);
     } catch (Exception e) {
-      throw new RuntimeException("Task not found" + "ID: " + id + ", Type: " + Task.class.getName());
+      throw new DataBindingViolationException("Task not found" + "ID: " + id + ", Type: " + Task.class.getName());
     }
   }
 }
