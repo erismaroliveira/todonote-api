@@ -1,18 +1,25 @@
 package com.erismaroliveira.todonote.services;
 
 import java.util.Optional;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.erismaroliveira.todonote.models.User;
+import com.erismaroliveira.todonote.models.enums.ProfileEnum;
 import com.erismaroliveira.todonote.repositories.UserRepository;
 import com.erismaroliveira.todonote.services.exceptions.DataBindingViolationException;
 import com.erismaroliveira.todonote.services.exceptions.ObjectNotFoundException;
 
 @Service
 public class UserService {
+
+  @Autowired
+  private BCryptPasswordEncoder bCryptPasswordEncoder;
   
   @Autowired
   private UserRepository userRepository;
@@ -26,6 +33,8 @@ public class UserService {
   @Transactional
   public User create(User user) {
     user.setId(null);
+    user.setPassword(this.bCryptPasswordEncoder.encode(user.getPassword()));
+    user.setProfiles(Stream.of(ProfileEnum.USER.getCode()).collect(Collectors.toSet()));
     user = this.userRepository.save(user);
     return user;
   }
@@ -34,6 +43,7 @@ public class UserService {
   public User update(User user) {
     User newUser = this.findById(user.getId());
     newUser.setPassword(user.getPassword());
+    newUser.setPassword(this.bCryptPasswordEncoder.encode(newUser.getPassword()));
     return this.userRepository.save(newUser);
   }
 
