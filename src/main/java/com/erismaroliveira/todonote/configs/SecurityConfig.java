@@ -19,6 +19,7 @@ import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
+import com.erismaroliveira.todonote.security.JWTAuthenticationFilter;
 import com.erismaroliveira.todonote.security.JWTUtil;
 
 @Configuration
@@ -61,6 +62,8 @@ public class SecurityConfig {
             .requestMatchers(HttpMethod.POST, PUBLIC_MATCHERS_POST).permitAll()
             .requestMatchers(PUBLIC_MATCHERS).permitAll()
             .anyRequest().authenticated())
+            .authenticationManager(authenticationManager)
+        .addFilter(new JWTAuthenticationFilter(this.authenticationManager, this.jwtUtil))
         .build();
   }
 
