@@ -1,7 +1,7 @@
 package com.erismaroliveira.todonote.services;
 
 import java.util.List;
-import java.util.Optional;
+import java.util.Objects;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -9,7 +9,10 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.erismaroliveira.todonote.models.Task;
 import com.erismaroliveira.todonote.models.User;
+import com.erismaroliveira.todonote.models.enums.ProfileEnum;
 import com.erismaroliveira.todonote.repositories.TaskRepository;
+import com.erismaroliveira.todonote.security.UserSpringSecurity;
+import com.erismaroliveira.todonote.services.exceptions.AuthorizationException;
 import com.erismaroliveira.todonote.services.exceptions.DataBindingViolationException;
 import com.erismaroliveira.todonote.services.exceptions.ObjectNotFoundException;
 
@@ -23,17 +26,33 @@ public class TaskService {
   private UserService userService;
 
   public Task findById(Long id) {
-    Optional<Task> task = this.taskRepository.findById(id);
-    return task.orElseThrow(() -> new ObjectNotFoundException("Task not found" + "ID: " + id + ", Type: " + Task.class.getName()));
+    Task task = this.taskRepository.findById(id).orElseThrow(() -> new ObjectNotFoundException(
+      "Task not found" + "ID: " + id + ", Type: " + Task.class.getName()));
+
+    UserSpringSecurity userSpringSecurity = UserService.authenticated();
+    if (Objects.isNull(userSpringSecurity)
+      || !userSpringSecurity.hasRole(ProfileEnum.ADMIN) && !userHasTask(userSpringSecurity, task))
+      throw new AuthorizationException("Access denied");
+
+    return task;
   }
 
-  public List<Task> findAllByUserId(Long userId) {
-    return this.taskRepository.findByUser_Id(userId);
+  public List<Task> findAllByUser() {
+    UserSpringSecurity userSpringSecurity = UserService.authenticated();
+    if (Objects.isNull(userSpringSecurity))
+      throw new AuthorizationException("Access denied");
+
+    List<Task> tasks = this.taskRepository.findByUser_Id(userSpringSecurity.getId());
+    return tasks;
   }
 
   @Transactional
   public Task create(Task task) {
-    User user = this.userService.findById(task.getUser().getId());
+    UserSpringSecurity userSpringSecurity = UserService.authenticated();
+    if (Objects.isNull(userSpringSecurity))
+      throw new AuthorizationException("Access denied");
+
+    User user = this.userService.findById(userSpringSecurity.getId());
     task.setId(null);
     task.setUser(user);
     task = this.taskRepository.save(task);
@@ -54,5 +73,9 @@ public class TaskService {
     } catch (Exception e) {
       throw new DataBindingViolationException("Task not found" + "ID: " + id + ", Type: " + Task.class.getName());
     }
+  }
+
+  public Boolean userHasTask(UserSpringSecurity userSpringSecurity, Task task) {
+    return task.getUser().getId().equals(userSpringSecurity.getId());
   }
 }
