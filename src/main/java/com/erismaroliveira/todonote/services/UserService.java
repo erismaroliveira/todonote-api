@@ -12,12 +12,16 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.erismaroliveira.todonote.models.User;
+import com.erismaroliveira.todonote.models.dto.UserCreateDTO;
+import com.erismaroliveira.todonote.models.dto.UserUpdateDTO;
 import com.erismaroliveira.todonote.models.enums.ProfileEnum;
 import com.erismaroliveira.todonote.repositories.UserRepository;
 import com.erismaroliveira.todonote.security.UserSpringSecurity;
 import com.erismaroliveira.todonote.services.exceptions.AuthorizationException;
 import com.erismaroliveira.todonote.services.exceptions.DataBindingViolationException;
 import com.erismaroliveira.todonote.services.exceptions.ObjectNotFoundException;
+
+import jakarta.validation.Valid;
 
 @Service
 public class UserService {
@@ -70,5 +74,19 @@ public class UserService {
     } catch (Exception e) {
       return null;
     }
+  }
+
+  public User fromDTO(@Valid UserCreateDTO userDTO) {
+    User user = new User();
+    user.setUsername(userDTO.getUsername());
+    user.setPassword(userDTO.getPassword());
+    return user;
+  }
+
+  public User fromDTO(@Valid UserUpdateDTO userDTO) {
+    User user = new User();
+    user.setId(userDTO.getId());
+    user.setPassword(userDTO.getPassword());
+    return user;
   }
 }

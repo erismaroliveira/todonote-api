@@ -10,6 +10,7 @@ import org.springframework.transaction.annotation.Transactional;
 import com.erismaroliveira.todonote.models.Task;
 import com.erismaroliveira.todonote.models.User;
 import com.erismaroliveira.todonote.models.enums.ProfileEnum;
+import com.erismaroliveira.todonote.models.projection.TaskProjection;
 import com.erismaroliveira.todonote.repositories.TaskRepository;
 import com.erismaroliveira.todonote.security.UserSpringSecurity;
 import com.erismaroliveira.todonote.services.exceptions.AuthorizationException;
@@ -37,12 +38,12 @@ public class TaskService {
     return task;
   }
 
-  public List<Task> findAllByUser() {
+  public List<TaskProjection> findAllByUser() {
     UserSpringSecurity userSpringSecurity = UserService.authenticated();
     if (Objects.isNull(userSpringSecurity))
       throw new AuthorizationException("Access denied");
 
-    List<Task> tasks = this.taskRepository.findByUser_Id(userSpringSecurity.getId());
+    List<TaskProjection> tasks = this.taskRepository.findByUser_Id(userSpringSecurity.getId());
     return tasks;
   }
 
