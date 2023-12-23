@@ -1,4 +1,4 @@
-const url = "http://localhost:8080/api/v1/tasks/user/1";
+const url = "http://localhost:8080/api/v1/tasks/user";
 
 function hideLoader() {
   document.getElementById("loading").style.display = "none";
@@ -22,7 +22,14 @@ function show(tasks) {
 }
 
 async function getTasks(url) {
-  const response = await fetch(url, { method: "GET" });
+  let key = "Authorization";
+  const response = await fetch(url, { 
+    method: "GET",
+    headers: new Headers({
+      Authorization: localStorage.getItem(key),
+    }),
+  });
+
   const tasks = await response.json();
 
   if (tasks.length > 0)
@@ -30,5 +37,10 @@ async function getTasks(url) {
 
   show(tasks);
 }
+
+document.addEventListener("DOMContentLoaded", function(event) {
+  if (!localStorage.getItem("Authorization"))
+    window.location = "/view/login.html";
+});
 
 getTasks(url);
